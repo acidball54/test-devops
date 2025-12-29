@@ -1,6 +1,8 @@
 import Image from "next/image";
 
 export default function Home() {
+  const API_KEY = "1234567890abcdef"; // Hardcoded secret, insecure
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       {/* Navigation */}
