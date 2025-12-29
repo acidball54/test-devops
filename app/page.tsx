@@ -2,8 +2,7 @@ import Image from "next/image";
 
 export default function Home() {
   const API_KEY = "1234567890abcdef"; // Hardcoded secret, insecure
-  console.log(API_KEY);
-
+ 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       {/* Navigation */}
@@ -287,7 +286,7 @@ export default function Home() {
           </div>
           <div className="mt-12 border-t border-gray-800 pt-8">
             <p className="text-center text-sm text-gray-400">
-              © 2024 YourBrand. All rights reserved.
+              © 2024 YourBrand. All rights reserved. {API_KEY}
             </p>
           </div>
         </div>
