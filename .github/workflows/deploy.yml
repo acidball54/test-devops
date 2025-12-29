@@ -1,69 +1,35 @@
-name: Deploy
+name: Docker Hub Deploy
 
 on:
-  workflow_run:
-    workflows: ["CI/CD Pipeline"]
-    types:
-      - completed
+  push:
     branches:
       - main
       - master
 
+env:
+  IMAGE_NAME: ${{ secrets.DOCKER_HUB_USERNAME }}/test-devops
+
 jobs:
-  deploy:
-    name: Deploy Application
+  build-and-push:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
         with:
-          node-version: '20.x'
-          cache: 'npm'
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build Next.js app
-        run: npm run build
-        env:
-          NODE_ENV: production
-
-      # Add your deployment steps here
-      # Examples:
-      #
-      # For Vercel:
-      # - name: Deploy to Vercel
-      #   uses: amondnet/vercel-action@v25
-      #   with:
-      #     vercel-token: ${{ secrets.VERCEL_TOKEN }}
-      #     vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-      #     vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-      #     vercel-args: '--prod'
-      #
-      # For AWS S3 + CloudFront:
-      # - name: Configure AWS credentials
-      #   uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: us-east-1
-      #
-      # - name: Deploy to S3
-      #   run: |
-      #     aws s3 sync .next/static s3://your-bucket-name/_next/static --delete
-      #     aws s3 sync public s3://your-bucket-name/public --delete
-      #
-      # For Docker:
-      # - name: Build Docker image
-      #   run: docker build -t your-app:${{ github.sha }} .
-      #
-      # - name: Push to Docker Registry
-      #   run: docker push your-app:${{ github.sha }}
-
-      - name: Deployment successful
-        run: echo "Deployment completed successfully!"
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
